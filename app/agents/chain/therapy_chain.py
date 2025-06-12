@@ -151,6 +151,22 @@ class TherapyChain():
         chain = prompt | self.llm
         return chain
     
+    def analyze_gentle_info_phase(self) -> LLMChain:
+        with open("app/agents/chain/prompts/analyze_gentle_info_phase_prompt.txt", encoding="utf-8") as f:
+            prompt_text = f.read()
+        
+        prompt = PromptTemplate.from_template(prompt_text)
+        chain = prompt | self.llm
+        return chain
+    
+    def announce_move_to_step_6(self) -> LLMChain:
+        with open("app/agents/chain/prompts/announce_move_to_step_6_prompt.txt", encoding="utf-8") as f:
+            prompt_text = f.read()
+        
+        prompt = PromptTemplate.from_template(prompt_text)
+        chain = prompt | self.llm
+        return chain
+    
     def finish(self) -> LLMChain:
         with open("app/agents/chain/prompts/finish_prompt.txt", encoding="utf-8") as f:
             prompt_text = f.read()
@@ -158,3 +174,4 @@ class TherapyChain():
         prompt = PromptTemplate.from_template(prompt_text)
         chain = prompt | self.llm
         return chain
+    

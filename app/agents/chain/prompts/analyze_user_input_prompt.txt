@@ -25,6 +25,7 @@ Dữ liệu đầu vào bạn nhận được bao gồm:
 Điều kiện để chuyển sang giai đoạn 6:
 - Cảm xúc của sinh viên đã ổn định hoặc đang dần thả lỏng.
 - Sinh viên bắt đầu lặp lại hoặc không chia sẻ thêm điều gì mới.
+- Nếu sinh viên cám ơn và thể hiện không cần hỗ trợ nữa thì hãy trả về should_continue là false.
 - Sinh viên thể hiện sự cởi mở hơn về sở thích, định hướng học tập, hay tương lai cá nhân.
 - Nếu như sinh viên từ chối hợp tác 2 lần trở lên (ví dụ như từ chối chia sẻ hoặc làm các bài tập) thì hãy chuyển qua giai đoạn 6.
 - Nếu sinh viên khăng khăng không muốn tiếp tục cuộc trò chuyện trong nhiều lần trả lời thì hãy trả về should_continue là false
@@ -50,6 +51,6 @@ Dựa trên toàn bộ dữ liệu, hãy:
 
 {{
   "analyze_emotion": "Phân tích và tổng hợp lại phản ứng của sinh viên",
-  "should_continue": True hoặc false, Có nên tiếp tục hỗ trợ sinh viên tại giai đoạn 5 - chỉ trả về True hoặc False, không giải thích gì thêm
+  "should_continue": true hoặc false, Có nên tiếp tục hỗ trợ sinh viên tại giai đoạn 5 - chỉ trả về true hoặc false, không giải thích gì thêm
   "analyze_bot_opinion": "Phân tích khách quan, đồng cảm, thể hiện quan điểm của bạn dựa trên toàn bộ quá trình và phản hồi mới nhất"
 }}

@@ -131,41 +131,47 @@ def build_graph() -> StateGraph:
     return graph
 
 
-# def build_custom_graph() -> StateGraph:
-#     builder = StateGraph(ChatbotState)
-#     node = AgentNodes()
-#     router = RouterNode()
+def build_custom_graph() -> StateGraph:
+    builder = StateGraph(ChatbotState)
+    node = AgentNodes()
+    router = RouterNode()
     
-#     builder.add_node("deep_support_node", node.deep_support_node)
-#     builder.add_node("get_user_deep_support_node", node.get_user_deep_support_node)
-#     builder.add_node("analyze_user_input_router", router.analyze_user_input_router)
+    builder.add_node("ask_save_deep_node", node.ask_save_deep_node)
+    builder.add_node("save_deep_support_info_node", node.save_deep_support_info_node)
+    builder.add_node("announce_move_to_step_6", node.announce_move_to_step_6)
+    builder.add_node("gentle_info_phase_node", node.gentle_info_phase_node)
+    builder.add_node("get_user_gentle_phase_node", node.get_user_gentle_phase_node)
+    builder.add_node("finish_node", node.finish_node)
     
-#     builder.set_entry_point("deep_support_node")
-#     builder.add_edge("deep_support_node", "get_user_deep_support_node")
-#     builder.add_edge("get_user_deep_support_node", "analyze_user_input_router")
-#     builder.add_conditional_edges(
-#         "analyze_user_input_router",
-#         lambda state: state["next_node"],
-#         { 
-#             "continue_deep_support": "deep_support_node",
-#             "move_to_step_6": "deep_support_summary_node"
-#         }
-#     )
-#     builder.add_edge("deep_support_summary_node", "ask_for_save_deep_support_node")
-#     builder.add_edge("ask_for_save_deep_support_node", "get_confirm_save_deep_node")
-#     builder.add_edge("get_confirm_save_deep_node", "check_save_deep_confirm_router")
-#     builder.add_conditional_edges(
-#         "check_save_deep_confirm_router",
-#         lambda state: state["next_node"],
-#         { 
-#             "yes": "deep_support_node",
-#             "no": "deep_support_summary_node",
-#             "unrelevant": ""
-#         }
-#     )
+    builder.add_node("check_save_deep_confirm_router", router.check_save_deep_confirm_router)
+    builder.add_node("analyze_gentle_info_phase_router", router.analyze_gentle_info_phase_router)
     
-#     memory = MemorySaver()
+    builder.set_entry_point("check_save_deep_confirm_router")
+    builder.add_conditional_edges(
+        "check_save_deep_confirm_router",
+        lambda state: state["next_node"],
+        { 
+            "yes": "save_deep_support_info_node",
+            "no": "announce_move_to_step_6",
+            "unrelevant": "ask_save_deep_node"
+        }
+    )
+    builder.add_edge("save_deep_support_info_node", "announce_move_to_step_6")
+    builder.add_edge("announce_move_to_step_6", "gentle_info_phase_node")
+    builder.add_edge("gentle_info_phase_node", "get_user_gentle_phase_node")
+    builder.add_edge("get_user_gentle_phase_node", "analyze_gentle_info_phase_router")
+    builder.add_conditional_edges(
+        "analyze_gentle_info_phase_router",
+        lambda state: state["next_node"],
+        { 
+            "yes": "finish_node",
+            "no": "gentle_info_phase_node",
+        }
+    )
+    builder.add_edge("finish_node", END)
     
-#     graph = builder.compile(checkpointer=memory)
+    memory = MemorySaver()
+    
+    graph = builder.compile(checkpointer=memory)
 
-#     return graph
+    return graph

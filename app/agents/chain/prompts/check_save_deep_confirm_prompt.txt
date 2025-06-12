@@ -22,7 +22,7 @@ user_input: "Không"
 Output:
 {{
     "intent": "no",
-    "question": "Mình hiểu rồi, mình sẽ không lưu thông tin cuộc trò chuyện này nên bạn hoàn toàn yên tâm nhé."
+    "message": "Mình hiểu rồi, mình sẽ không lưu thông tin cuộc trò chuyện này nên bạn hoàn toàn yên tâm nhé."
 }}
 
 2.
@@ -32,7 +32,7 @@ user_input: "Có"
 Output:
 {{
     "intent": "yes",
-    "question": "Ngay sau đây mình sẽ lưu lại cuộc trò chuyện này, bạn chờ mình một chút nhé."
+    "message": "Ngay sau đây mình sẽ lưu lại cuộc trò chuyện này, bạn chờ mình một chút nhé."
 }}
 
 
@@ -43,7 +43,7 @@ user_input: "Mình rất chán"
 Output:
 {{
     "intent": "unrelevant",
-    "question": "Bạn vui lòng trả lời đúng với câu hỏi của mình nhé."
+    "message": "Bạn vui lòng trả lời đúng với câu hỏi của mình nhé."
 }}
 
 Lưu ý: 

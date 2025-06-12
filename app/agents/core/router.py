@@ -101,7 +101,8 @@ class RouterNode:
             "should_last_support": should_last_support
         })
         
-        data = result.content.replace("```json", "").replace("```", "").replace("\n", "").strip()
+        data = result.content.replace("```json", "").replace("```", "").replace("\n", "")
+        print(f">>>>> data: {data}")
         data = json.loads(data)
         
         should_continue = data["should_continue"]
@@ -130,8 +131,8 @@ class RouterNode:
         data = result.content.replace("```json", "").replace("```", "").replace("\n", "").strip()
         data = json.loads(data)
         
-        if data["question"] is not None:
-            state["messages"] = add_messages(state["messages"], [AIMessage(content=data["question"])])
+        if data["message"] is not None:
+            state["messages"] = add_messages(state["messages"], [AIMessage(content=data["message"])])
 
         next_node = data["intent"]
         
@@ -152,8 +153,9 @@ class RouterNode:
             deep_support_summary = state["deep_support_summary"]
             next_node = "no"
             
-            result = self.chain.check_save_deep_confirm().invoke({
+            result = self.chain.analyze_gentle_info_phase().invoke({
                 "chatbot_name": CHATBOT_NAME,
+                "max_question_gentle_phase": max_question_gentle_phase,
                 "user_input": user_input,
                 "last_question": last_question,
                 "student_summary": student_summary,

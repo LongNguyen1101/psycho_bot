@@ -428,7 +428,7 @@ class AgentNodes:
         deep_support_summary = state["deep_support_summary"]
         stress_level = state["stress_level"]
         
-        result = self.chain.deep_support_summary().invoke({
+        result = self.chain.announce_move_to_step_6().invoke({
             "chatbot_name": CHATBOT_NAME,
             "student_summary": student_summary,
             "deep_support_summary": deep_support_summary,
@@ -485,7 +485,7 @@ class AgentNodes:
         stress_level = state["stress_level"] if state["stress_level"] else "Không có"
         chat_histories = state["messages"]
         
-        result = self.chain.gentle_info_phase().invoke({
+        result = self.chain.finish().invoke({
             "chatbot_name": CHATBOT_NAME,
             "student_summary": student_summary,
             "deep_support_summary": deep_support_summary,

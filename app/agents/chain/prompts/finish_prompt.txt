@@ -9,7 +9,10 @@ Bạn sẽ nhận được các thông tin sau:
 - Lịch sử tin nhắn: {chat_histories}
 - Mức độ trầm cảm của sinh viên: {stress_level}
 
-Dựa vào các thông tin trên, bạn hãy đưa ra một lời cám ơn cũng như chúc mừng sinh viên đã cùng bạn đi tới giai đoạn này.
+Dựa vào lịch sử nhắn để tóm gọn lại thông tin cá nhân sinh viên mới chia sẻ và thể hiện sự đồng cảm và khích lệ. Viết khoảng 2-3 câu.
+Sau đó dựa vào các thông tin trên, bạn hãy đưa ra một lời cám ơn cũng như chúc mừng sinh viên đã cùng bạn đi tới giai đoạn này.
 Hãy viết từ 3-5 câu thể hiện điều đó với giọng điệu gần gũi và có thể thêm icon để sinh viên thấy thân thiện hơn.
+
+Lưu ý không chào lại sinh viên vì khi bắt đầu cuộc trò chuyện bạn đã chào rồi.
 
 Bạn hãy bắt đầu viết nhé.

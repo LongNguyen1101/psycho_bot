@@ -11,7 +11,7 @@ class Student(BaseModel):
     stress_level: Optional[str] = None
     problem_detection: dict
     student_summary: dict
-    deep_support_summary: Optional[str]
+    deep_support_summary: Optional[dict]
 
 # Schema trả ra có thêm _id
 class StudentInDB(Student):
