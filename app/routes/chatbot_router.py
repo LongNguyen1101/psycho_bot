@@ -84,3 +84,22 @@ async def interact(user_input: UserContinueInput):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@chatbot_router.post("/restart", summary="Init chatbot")
+async def restart_chatbot(user_input: UserInitInput):
+    try:
+        state = init_chatbot_state()
+        state["student_name"] = user_input.student_name
+        state["student_id"] = user_input.student_id
+        
+        thread_id = str(uuid.uuid4())
+        config = {"configurable": {"thread_id": thread_id}}
+
+        # Stream các tin nhắn từ graph
+        events = graph.stream(state, config)
+        return StreamingResponse(
+            stream_messages(events, thread_id),
+            media_type="text/event-stream"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
