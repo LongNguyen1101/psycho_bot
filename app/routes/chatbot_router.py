@@ -40,7 +40,8 @@ async def stream_messages(events: Any, thread_id: str):
                             "id": message.id,
                             "thread_id": thread_id
                         }
-                        yield f"data: {json.dumps(message_dict, ensure_ascii=False)}\n\n"
+                        if message_dict["type"] == "ai":
+                            yield f"data: {json.dumps(message_dict, ensure_ascii=False)}\n\n"
 
     except Exception as e:
         error_dict = {"error": str(e), "thread_id": thread_id}
