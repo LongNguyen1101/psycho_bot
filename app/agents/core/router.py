@@ -1,3 +1,4 @@
+from itertools import chain
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, AIMessage
 from langgraph.graph.message import add_messages
@@ -79,3 +80,93 @@ class RouterNode:
         state["next_node"] = next_node
         return state
     
+    def analyze_user_input_router(self, state: ChatbotState) -> ChatbotState:
+        print(f"> Node: analyze_user_input_router")
+        next_node = "move_to_step_6"
+        
+        user_input = state["user_input"]
+        student_summary = state["student_summary"]
+        stress_level = state["stress_level"]
+        last_support_direction = state["last_support_direction"] if state["last_support_direction"] else "Không có"
+        chat_history = state["messages"][-10:]
+        should_last_support = state["should_last_support"] if state["should_last_support"] else "Không có"
+        
+        result = self.chain.analyze_user_input().invoke({
+            "chatbot_name": CHATBOT_NAME,
+            "user_input": user_input,
+            "student_summary": student_summary,
+            "stress_level": stress_level,
+            "last_support_direction": last_support_direction,
+            "chat_history": chat_history,
+            "should_last_support": should_last_support
+        })
+        
+        data = result.content.replace("```json", "").replace("```", "").replace("\n", "").strip()
+        data = json.loads(data)
+        
+        should_continue = data["should_continue"]
+        if should_continue:
+            next_node = "continue_deep_support"
+        
+        state["nodes_flow"].append("analyze_user_input_router")
+        state["analyze_emotion"] = data["analyze_emotion"]
+        state["analyze_bot_opinion"] = data["analyze_bot_opinion"]
+        state["next_node"] = next_node
+        return state
+    
+    def check_save_deep_confirm_router(self, state: ChatbotState) -> ChatbotState:
+        print(f"> Node: check_save_deep_confirm_router")
+        
+        user_input = state["user_input"]
+        last_question = state["messages"][-2].content
+        next_node = "yes"
+        
+        result = self.chain.check_save_deep_confirm().invoke({
+            "chatbot_name": CHATBOT_NAME,
+            "user_input": user_input,
+            "last_question": last_question
+        })
+        
+        data = result.content.replace("```json", "").replace("```", "").replace("\n", "").strip()
+        data = json.loads(data)
+        
+        if data["question"] is not None:
+            state["messages"] = add_messages(state["messages"], [AIMessage(content=data["question"])])
+
+        next_node = data["intent"]
+        
+        state["next_node"] = next_node
+        state["nodes_flow"].append("check_save_deep_confirm_router")
+        return state
+    
+    def analyze_gentle_info_phase_router(self, state: ChatbotState) -> ChatbotState:
+        print(f"> Node: analyze_gentle_info_phase_router")
+        next_node = "yes"
+        
+        max_question_gentle_phase = state["max_question_gentle_phase"]
+        
+        if max_question_gentle_phase > 0:
+            user_input = state["user_input"]
+            last_question = state["messages"][-2].content
+            student_summary = state["student_summary"]
+            deep_support_summary = state["deep_support_summary"]
+            next_node = "no"
+            
+            result = self.chain.check_save_deep_confirm().invoke({
+                "chatbot_name": CHATBOT_NAME,
+                "user_input": user_input,
+                "last_question": last_question,
+                "student_summary": student_summary,
+                "deep_support_summary": deep_support_summary
+            })
+
+            data = result.content.replace("```json", "").replace("```", "").replace("\n", "").strip()
+            data = json.loads(data)
+            
+            state["analyze_gentle_phase_opinion"] = data.get("analyze_answer", None)
+            state["suggest_next_question_gentle_phase"] = data.get("suggest_next_question", None)
+            
+        
+        state["next_node"] = next_node
+        state["nodes_flow"].append("analyze_gentle_info_phase_router")
+        return state

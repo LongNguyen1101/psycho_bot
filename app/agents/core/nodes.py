@@ -10,6 +10,9 @@ import os
 from dotenv import load_dotenv
 import json
 
+from app.controllers.students_controller import create_student
+from app.models.students_model import Student
+
 load_dotenv(override=True)
 
 MODEL_NAME = os.getenv("MODEL_NAME")
@@ -219,6 +222,7 @@ class AgentNodes:
         
         user_input = state["user_input"]
         reason = state["problem_depth_analysis"].get("reason", None)
+        first_phq9 = state["first_phq9"]
         messages = state["messages"][-10:]
         last_10_chat_history = [{
             "role": mess.type,
@@ -229,6 +233,7 @@ class AgentNodes:
         
         result = self.chain.ask_PHQ9().invoke({
             "chatbot_name": CHATBOT_NAME,
+            "first_phq9": first_phq9,
             "user_input": user_input, 
             "last_10_chat_history": last_10_chat_history,
             "reason": reason,
@@ -242,6 +247,7 @@ class AgentNodes:
         
         state["nodes_flow"].append("ask_phq_9_node")
         state["phq9_index"] = phq9_question["index"]
+        state["first_phq9"] = False
         state["last_question"] = question
         state["messages"] = add_messages(state["messages"], [AIMessage(content=question)])
         return state
@@ -290,6 +296,204 @@ class AgentNodes:
         data = result.content.replace("```json", "").replace("```", "").replace("\n", "").strip()
         data = json.loads(data)
         
-        state["problem_summary"] = data
+        state["deep_support_start_index"] = len(state["messages"]) - 1
+        state["student_summary"] = data
         state["nodes_flow"].append("problem_summary_node")
         return state
+    
+    def deep_support_node(self, state: ChatbotState) -> ChatbotState:
+        print(f"> Node: deep_support_node")
+        
+        student_summary = state["student_summary"]
+        stress_level = state["stress_level"]
+        chat_history = state["messages"][-10:]
+        last_support_direction = state["last_support_direction"] if state["last_support_direction"] else "Không có"
+        analyze_emotion = state["analyze_emotion"] if state["analyze_emotion"] else "Không có"
+        analyze_bot_opinion = state["analyze_bot_opinion"] if state["analyze_bot_opinion"] else "Không có"
+        
+        result = self.chain.deep_support().invoke({
+            "chatbot_name": CHATBOT_NAME,
+            "student_summary": student_summary,
+            "stress_level": stress_level,
+            "chat_history": chat_history,
+            "last_support_direction": last_support_direction,
+            "analyze_emotion": analyze_emotion,
+            "analyze_bot_opinion": analyze_bot_opinion
+        })
+        
+        data = result.content.replace("```json", "").replace("```", "").replace("\n", "").strip()
+        data = json.loads(data)
+        
+        state["messages"] = add_messages(state["messages"], [AIMessage(content=data["support"])])
+        state["last_support_direction"] = data["last_support_direction"]
+        state["should_last_support"] = data["should_last_support"]
+        state["nodes_flow"].append("deep_support_node")
+        return state
+    
+    def get_user_deep_support_node(self, state: ChatbotState) -> ChatbotState:
+        print(f"> Node: get_user_deep_support_node")
+        
+        user_input = interrupt(None)
+        
+        state["user_input"] = user_input
+        state["messages"] = add_messages(state["messages"], [HumanMessage(content=user_input)])
+        state["nodes_flow"].append("get_user_deep_support_node")
+        return state
+    
+    def deep_support_summary_node(self, state: ChatbotState) -> ChatbotState:
+        print(f"> Node: deep_support_summary_node")
+        
+        start_index = state["deep_support_start_index"]
+        dialogues = state["messages"][start_index:]
+        stress_level = state["stress_level"] if state["stress_level"] else "Không có"
+        student_summary = state["student_summary"]
+        
+        chat_data = [
+            {
+                "type": dialogue.type,
+                "content": dialogue.content
+            }
+            for dialogue in dialogues
+        ]
+        
+        result = self.chain.deep_support_summary().invoke({
+            "chatbot_name": CHATBOT_NAME,
+            "dialogue": chat_data,
+            "stress_level": stress_level,
+            "student_summary": student_summary
+        })
+        
+        data = result.content.replace("```json", "").replace("```", "").replace("\n", "").strip()
+        data = json.loads(data)
+        
+        state["deep_support_start_index"] = len(state["messages"]) - 1
+        state["deep_support_summary"] = data
+        state["nodes_flow"].append("deep_support_summary_node")
+        return state
+    
+    def ask_save_deep_node(self, state: ChatbotState) -> ChatbotState:
+        print(f"> Node: ask_save_deep_node")
+        
+        result = self.chain.ask_for_save_deep_support().invoke({
+            "chatbot_name": CHATBOT_NAME,
+        }).content
+        
+        state["messages"] = add_messages(state["messages"], [AIMessage(content=result)])
+        state["nodes_flow"].append("ask_save_deep_node")
+        return state
+    
+    def get_confirm_save_deep_node(self, state: ChatbotState) -> ChatbotState:
+        print(f"> Node: get_confirm_save_deep_node")
+        
+        user_input = interrupt(None)
+        
+        state["user_input"] = user_input
+        state["messages"] = add_messages(state["messages"], [HumanMessage(content=user_input)])
+        state["nodes_flow"].append("get_confirm_save_deep_node")
+        return state
+    
+    def save_deep_support_info_node(self, state: ChatbotState) -> ChatbotState:
+        print(f"> Node: save_deep_support_info_node")
+        msg = (
+            "Có một chút lỗi khi lưu thông tin rồi, nhưng không sao đâu, mình sẽ thử lại sau nha.\n"
+            "Điều quan trọng là mình và bạn vẫn có thể tiếp tục hành trình cùng nhau 💪"
+        )
+        
+        student = Student(
+            student_name=state["student_name"],
+            student_id = state["student_id"],
+            phq_progress = state["phq9_progress"],
+            stress_level = state["stress_level"],
+            problem_detection = state["problem_detection"],
+            student_summary = state["student_summary"],
+            deep_support_summary = state["deep_support_summary"]
+        )
+        
+        return_student = create_student(student)
+        if return_student.get("id", None):
+            msg = (
+                "Mình vừa lưu xong thông tin rồi đó 📝 "
+                "Cảm ơn bạn đã chờ mình nhé!\n"
+                "Giờ thì cùng nhau tiếp tục nào~"
+            )
+        
+        state["messages"] = add_messages(state["messages"], [HumanMessage(content=msg)])
+        state["nodes_flow"].append("save_deep_support_info_node")
+        return state
+    
+    def announce_move_to_step_6(self, state: ChatbotState) -> ChatbotState:
+        print(f"> Node: announce_move_to_step_6")
+        
+        student_summary = state["student_summary"]
+        deep_support_summary = state["deep_support_summary"]
+        stress_level = state["stress_level"]
+        
+        result = self.chain.deep_support_summary().invoke({
+            "chatbot_name": CHATBOT_NAME,
+            "student_summary": student_summary,
+            "deep_support_summary": deep_support_summary,
+            "stress_level": stress_level
+        }).content
+        
+        state["gentle_phase_start_index"] = len(state["messages"]) - 1
+        state["messages"] = add_messages(state["messages"], [AIMessage(content=result)])
+        state["nodes_flow"].append("announce_move_to_step_6")
+        return state
+    
+    def gentle_info_phase_node(self, state: ChatbotState) -> ChatbotState:
+        print(f"> Node: gentle_info_phase_node")
+        
+        max_question_gentle_phase = state["max_question_gentle_phase"]
+        student_summary = state["student_summary"]
+        deep_support_summary = state["deep_support_summary"]
+        stress_level = state["stress_level"] if state["stress_level"] else "Không có"
+        chat_histories = state["messages"]
+        analyze_gentle_phase_opinion = state["analyze_gentle_phase_opinion"] if state["analyze_gentle_phase_opinion"] else "Không có"
+        suggest_next_question_gentle_phase = state["suggest_next_question_gentle_phase"] if state["suggest_next_question_gentle_phase"] else "Không có"
+        
+        result = self.chain.gentle_info_phase().invoke({
+            "chatbot_name": CHATBOT_NAME,
+            "max_question_gentle_phase": max_question_gentle_phase,
+            "student_summary": student_summary,
+            "deep_support_summary": deep_support_summary,
+            "stress_level": stress_level,
+            "chat_histories": chat_histories,
+            "analyze_gentle_phase_opinion": analyze_gentle_phase_opinion,
+            "suggest_next_question_gentle_phase": suggest_next_question_gentle_phase
+        }).content
+        
+        state["max_question_gentle_phase"] -= 1
+        state["messages"] = add_messages(state["messages"], [AIMessage(content=result)])
+        state["nodes_flow"].append("gentle_info_phase_node")
+        return state
+    
+    def get_user_gentle_phase_node(self, state: ChatbotState) -> ChatbotState:
+        print(f"> Node: get_user_gentle_phase_node")
+        
+        user_input = interrupt(None)
+        
+        state["user_input"] = user_input
+        state["messages"] = add_messages(state["messages"], [HumanMessage(content=user_input)])
+        state["nodes_flow"].append("get_user_gentle_phase_node")
+        return state
+    
+    def finish_node(self, state: ChatbotState) -> ChatbotState:
+        print(f"> Node: finish_node")
+        
+        student_summary = state["student_summary"]
+        deep_support_summary = state["deep_support_summary"]
+        stress_level = state["stress_level"] if state["stress_level"] else "Không có"
+        chat_histories = state["messages"]
+        
+        result = self.chain.gentle_info_phase().invoke({
+            "chatbot_name": CHATBOT_NAME,
+            "student_summary": student_summary,
+            "deep_support_summary": deep_support_summary,
+            "stress_level": stress_level,
+            "chat_histories": chat_histories,
+        }).content
+        
+        state["messages"] = add_messages(state["messages"], [AIMessage(content=result)])
+        state["nodes_flow"].append("finish_node")
+        return state
+    

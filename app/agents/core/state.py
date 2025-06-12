@@ -1,5 +1,6 @@
-from typing import TypedDict, List, Dict, Any, Annotated
+from typing import Optional, TypedDict, List, Dict, Any, Annotated
 from langgraph.graph.message import add_messages
+from sqlalchemy import Boolean
 
 def get_phq_9_question() -> List[dict]:
     return [
@@ -52,27 +53,45 @@ def get_phq_9_question() -> List[dict]:
 
 
 class ChatbotState(TypedDict):
+    student_id: Optional[str]
+    student_name: Optional[str]
+    
     user_input: str
-    user_id: int
     messages: Annotated[list, add_messages]
-    next_node: str
+    next_node: Optional[str]
     nodes_flow: List[str]
     last_question: str
     
-    problem_detection: dict
-    problem_depth_analysis: dict
-    problem_analysis_start_index: int
+    problem_detection: Optional[dict]
+    problem_depth_analysis: Optional[dict]
+    problem_analysis_start_index: Optional[int]
     
+    first_phq9: Optional[bool]
     phq9_progress: List[dict]
-    phq9_index: int
-    stress_level: str
+    phq9_index: Optional[int]
+    stress_level: Optional[str]
     
-    problem_summary: str
+    student_summary: Optional[str]
+    
+    last_support_direction: Optional[str]
+    should_last_support: Optional[str]
+    analyze_emotion: Optional[str]
+    analyze_bot_opinion: Optional[str]
+    
+    deep_support_start_index: Optional[int]
+    deep_support_summary: Optional[str]
+    
+    gentle_phase_start_index: Optional[int]
+    max_question_gentle_phase: int
+    analyze_gentle_phase_opinion: Optional[str]
+    suggest_next_question_gentle_phase: Optional[str]
     
 def init_chatbot_state() -> ChatbotState:
     return ChatbotState(
+        student_id=None,
+        student_name=None,
+        
         user_input="",
-        user_id=None,
         messages=[],  # dùng Annotated[list, add_messages]
         next_node=None,
         nodes_flow=[],
@@ -82,9 +101,23 @@ def init_chatbot_state() -> ChatbotState:
         problem_depth_analysis=None,
         problem_analysis_start_index=None,
         
+        first_phq9=True,
         phq9_progress=get_phq_9_question(),
         phq9_index=None,
         stress_level=None,
 
-        problem_summary=None
+        student_summary=None,
+        
+        last_support_direction=None,
+        should_last_support=None,
+        analyze_emotion=None,
+        analyze_bot_opinion=None,
+        
+        deep_support_start_index=None,
+        deep_support_summary=None,
+        
+        gentle_phase_start_index=None,
+        max_question_gentle_phase=3,
+        analyze_gentle_phase_opinion=None,
+        suggest_next_question_gentle_phase=None
     )

@@ -102,3 +102,59 @@ class TherapyChain():
         prompt = PromptTemplate.from_template(prompt_text)
         chain = prompt | self.llm
         return chain
+    
+    def deep_support(self) -> LLMChain:
+        with open("app/agents/chain/prompts/deep_support_prompt.txt", encoding="utf-8") as f:
+            prompt_text = f.read()
+        
+        prompt = PromptTemplate.from_template(prompt_text)
+        chain = prompt | self.llm
+        return chain
+    
+    def analyze_user_input(self) -> LLMChain:
+        with open("app/agents/chain/prompts/analyze_user_input_prompt.txt", encoding="utf-8") as f:
+            prompt_text = f.read()
+        
+        prompt = PromptTemplate.from_template(prompt_text)
+        chain = prompt | self.llm
+        return chain
+    
+    def deep_support_summary(self) -> LLMChain:
+        with open("app/agents/chain/prompts/deep_support_summary_prompt.txt", encoding="utf-8") as f:
+            prompt_text = f.read()
+        
+        prompt = PromptTemplate.from_template(prompt_text)
+        chain = prompt | self.llm
+        return chain
+    
+    def ask_for_save_deep_support(self) -> LLMChain:
+        with open("app/agents/chain/prompts/ask_for_save_deep_support_prompt.txt", encoding="utf-8") as f:
+            prompt_text = f.read()
+        
+        prompt = PromptTemplate.from_template(prompt_text)
+        chain = prompt | self.llm
+        return chain
+    
+    def check_save_deep_confirm(self) -> LLMChain:
+        with open("app/agents/chain/prompts/check_save_deep_confirm_prompt.txt", encoding="utf-8") as f:
+            prompt_text = f.read()
+        
+        prompt = PromptTemplate.from_template(prompt_text)
+        chain = prompt | self.llm
+        return chain
+    
+    def gentle_info_phase(self) -> LLMChain:
+        with open("app/agents/chain/prompts/gentle_info_phase_prompt.txt", encoding="utf-8") as f:
+            prompt_text = f.read()
+        
+        prompt = PromptTemplate.from_template(prompt_text)
+        chain = prompt | self.llm
+        return chain
+    
+    def finish(self) -> LLMChain:
+        with open("app/agents/chain/prompts/finish_prompt.txt", encoding="utf-8") as f:
+            prompt_text = f.read()
+        
+        prompt = PromptTemplate.from_template(prompt_text)
+        chain = prompt | self.llm
+        return chain
