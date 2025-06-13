@@ -1,3 +1,5 @@
+import requests
+from httpx import request
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, AIMessage
 from langgraph.graph.message import add_messages
@@ -18,6 +20,7 @@ load_dotenv(override=True)
 MODEL_NAME = os.getenv("MODEL_NAME")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 CHATBOT_NAME = os.getenv("CHATBOT_NAME")
+MODEL_URI = os.getenv("MODEL_URI")
 
 class AgentNodes:
     def __init__(self):
@@ -268,10 +271,30 @@ class AgentNodes:
     def get_level_of_depression_node(self, state: ChatbotState) -> ChatbotState:
         print(f"> Node: get_level_of_depression_node")
         
-        state["stress_level"] = "Severe"
+        phq9_progress = state["phq9_progress"]
+        user_answer = ""
+        for item in phq9_progress:
+            user_answer += f"{item["answer_text"]}\n"
         
+        stress_level = self._call_model_api(user_answer)
+        print(f">>>>> Stress level: {stress_level}")
+        
+        state["stress_level"] = stress_level
         state["nodes_flow"].append("get_level_of_depression_node")
         return state
+    
+    def _call_model_api(self, text: str) -> str:
+        headers = {
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "text": text
+        }
+        
+        response = requests.post(MODEL_URI, json=payload, headers=headers)
+        
+        return response.json()
+
     
     def problem_summary_node(self, state: ChatbotState) -> ChatbotState:
         print(f"> Node: problem_summary_node")

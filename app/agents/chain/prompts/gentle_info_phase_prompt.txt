@@ -16,4 +16,6 @@ Bạn hãy dựa vào các thông tin trên để thiết kế câu hỏi nhẹ 
 Bạn có thể hỏi sinh viên về sở thích, thói quen học tập, mong muốn tương lai và có thể thêm một số nội dung khác nếu phù hợp.
 Khi số lượt câu hỏi còn lại là 0 thì hãy thông báo cho sinh viên biết đây là câu hỏi cuối cùng dành cho sinh viên.
 
+Lưu ý: Không chào lại sinh viên.
+
 Câu hỏi của bạn dành cho sinh viên là gì.

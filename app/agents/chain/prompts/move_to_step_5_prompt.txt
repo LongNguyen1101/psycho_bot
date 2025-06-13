@@ -23,5 +23,6 @@ Lưu ý:
 - Không đưa ra lời khuyên cụ thể ở giai đoạn này
 - Tạo cảm giác an toàn và thoải mái cho sinh viên
 - Chỉ trả về đoạn văn chuyển tiếp, không kèm theo bất kỳ giải thích hay văn bản nào khác.
+- Không chào lại sinh viên.
 
 Đoạn văn chuyển tiếp là gì? 

@@ -22,5 +22,6 @@ Lưu ý:
 - Không hỏi trùng với các câu đã hỏi trước trong lịch sử hội thoại
 - Câu hỏi nên tập trung vào vấn đề cụ thể mà sinh viên đang gặp phải
 - Chỉ trả về một câu hỏi, không kèm theo bất kỳ giải thích hay văn bản nào khác.
+- Không chào lại sinh viên.
 
 Câu hỏi dành cho sinh viên là gì? 
