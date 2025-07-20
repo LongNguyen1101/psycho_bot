@@ -31,11 +31,11 @@ This project is a Therapy Bot API (AnVie) built with FastAPI. It is designed to 
     ```
 
 ### Running the API
-    ```bash
-    uvicorn main:app --host 0.0.0.0 --port $PORT
-    ```
+```bash
+uvicorn main:app --host 0.0.0.0 --port $PORT
+```
 
-    Replace `$PORT` with the desired port number.
+Replace `$PORT` with the desired port number.
 
 ## Project Structure
 
